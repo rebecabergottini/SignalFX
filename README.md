@@ -8,7 +8,6 @@ Aplicación web que ofrece señales de trading para los principales pares de div
 - Cálculo automático de indicadores técnicos (EMA20, EMA50, RSI14)  
 - Generación de señales de trading: COMPRA, VENTA o ESPERAR  
 - Panel dinámico con precios y cambios para pares de divisas seleccionados  
-- Interfaz web responsiva y fácil de usar  
 
 ## Indicadores técnicos usados
 
