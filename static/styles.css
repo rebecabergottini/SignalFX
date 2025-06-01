@@ -1,0 +1,142 @@
+:root {
+    --dark-bg: #121723;
+    --darker-bg: #0d111c;
+    --primary-accent: #2962ff;
+    --buy-color: #26a69a;
+    --sell-color: #ef5350;
+    --neutral-color: #ffb300;
+    --text-primary: #e0e0e0;
+    --text-secondary: #9e9e9e;
+}
+
+body {
+    background-color: var(--dark-bg);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    color: var(--primary-accent) !important;
+}
+
+.card {
+    background-color: var(--darker-bg);
+    border: 1px solid #2a3042;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-control, .form-select {
+    background-color: #1e2130;
+    border: 1px solid #2a3042;
+    color: var(--text-primary);
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: #1e2130;
+    color: var(--text-primary);
+    border-color: var(--primary-accent);
+    box-shadow: 0 0 0 0.25rem rgba(41, 98, 255, 0.25);
+}
+
+.btn-primary {
+    background-color: var(--primary-accent);
+    border: none;
+    font-weight: 500;
+}
+
+.btn-primary:hover {
+    background-color: #1a56ff;
+}
+
+.signal-buy {
+    color: var(--buy-color);
+    font-weight: 700;
+}
+
+.signal-sell {
+    color: var(--sell-color);
+    font-weight: 700;
+}
+
+.signal-neutral {
+    color: var(--neutral-color);
+    font-weight: 700;
+}
+
+.price-up {
+    color: var(--buy-color);
+}
+
+.price-down {
+    color: var(--sell-color);
+}
+
+.market-status {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.market-open {
+    background-color: var(--buy-color);
+}
+
+.market-closed {
+    background-color: var(--sell-color);
+}
+
+.ticker-tape {
+    background-color: var(--darker-bg);
+    padding: 10px 0;
+    border-top: 1px solid #2a3042;
+    border-bottom: 1px solid #2a3042;
+    overflow: hidden;
+    white-space: nowrap;
+    
+}
+
+.ticker-item {
+    display: inline-block;
+    margin-right: 30px;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.timeframe-selector {
+    display: flex;
+    border-radius: 6px;
+    overflow: hidden;
+    background-color: #1e2130;
+}
+
+.timeframe-btn {
+    color: var(--text-primary);
+    flex: 1;
+    padding: 6px 10px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+}
+
+.timeframe-btn:hover {
+    background-color: #2a3042;
+}
+
+.timeframe-btn.active {
+    background-color: var(--primary-accent);
+}
+
+.input-group-text {
+    background-color: #2a3042;
+    border: 1px solid #2a3042;
+    color: var(--text-primary);
+}
+
+.badge {
+    font-weight: 500;
+}
