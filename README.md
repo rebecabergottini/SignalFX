@@ -22,9 +22,9 @@ El sistema genera señales basadas en:
 - Cruce de niveles clave del RSI (70 y 30)  
 
 ## Señales generadas:  
-- **COMPRA**: cuando EMA20 cruza por encima de EMA50 y RSI cruza hacia arriba el nivel 30  
-- **VENTA**: cuando EMA20 cruza por debajo de EMA50 y RSI cruza hacia abajo el nivel 70  
-- **ESPERAR**: en cualquier otro caso  
+- **COMPRA**: cuando la EMA20 cruza por encima de la EMA50 y el RSI cruza al alza el nivel 30.
+- **VENTA**: cuando la EMA20 cruza por debajo de la EMA50 y el RSI cruza a la baja el nivel 70.
+- **ESPERAR**: en cualquier otro caso que no cumpla las condiciones anteriores.
 
 ## Requisitos
 
