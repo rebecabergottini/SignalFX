@@ -81,6 +81,7 @@ def get_price_and_change(symbol, api_key):
             return None
         return {
             "symbol": symbol,
+            "display_symbol": symbol,
             "price": float(data.get("close", 0)),
             "change": float(data.get("percent_change", 0))
         }
@@ -102,7 +103,7 @@ def index():
     ticker_data = []
     for pair in PAIRS:
         data = get_price_and_change(pair, API_KEY)
-        if data is not None:
+        if data:
             ticker_data.append(data)
 
     if request.method == "POST":
