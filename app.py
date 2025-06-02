@@ -6,10 +6,7 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
-
 API_KEY = os.getenv("TWELVEDATA_API_KEY")
-
-
 app = Flask(__name__)
 
 def get_forex_data(symbol, interval, api_key, outputsize=100):
@@ -24,7 +21,7 @@ def get_forex_data(symbol, interval, api_key, outputsize=100):
     response = requests.get(url, params=params)
     data = response.json()
     if "values" not in data:
-        return None, data.get("message", "Error fetching data")
+        return None, data.get("message", "Error al obtener datos.")
     df = pd.DataFrame(data["values"])
     df = df.iloc[::-1]
     df["datetime"] = pd.to_datetime(df["datetime"])
@@ -33,78 +30,80 @@ def get_forex_data(symbol, interval, api_key, outputsize=100):
         df[col] = df[col].astype(float)
     return df, None
 
-
 def calculate_indicators(df):
     df["EMA20"] = ta.ema(df["close"], length=20)
     df["EMA50"] = ta.ema(df["close"], length=50)
     df["RSI"] = ta.rsi(df["close"], length=14)
+
+    macd = ta.macd(df["close"])
+    if macd is not None:
+        df["MACD"] = macd["MACD_12_26_9"]
+        df["MACDh"] = macd["MACDh_12_26_9"]
+    else:
+        df["MACD"] = df["MACDh"] = None
     return df
 
 def generate_signal(df):
     latest = df.iloc[-1]
-    previous = df.iloc[-2]
-    if (latest.EMA20 > latest.EMA50) and (previous.RSI < 30) and (latest.RSI > 30):
-        return "BUY"
-    elif (latest.EMA20 < latest.EMA50) and (previous.RSI > 70) and (latest.RSI < 70):
-        return "SELL"
-    else:
-        return "HOLD"
+    prev = df.iloc[-2]
+
+    signal = "HOLD"
+
+    # Condición BUY
+    if (
+        latest["EMA20"] > latest["EMA50"] and
+        prev["EMA20"] <= prev["EMA50"] and  # cruce reciente al alza
+        prev["RSI"] < 30 and latest["RSI"] > 30 and  # RSI saliendo de sobreventa
+        latest["close"] > latest["open"] and  # vela verde
+        latest["MACDh"] > prev["MACDh"]  # impulso alcista creciente
+    ):
+        signal = "BUY"
+
+    # Condición SELL
+    elif (
+        latest["EMA20"] < latest["EMA50"] and
+        prev["EMA20"] >= prev["EMA50"] and  # cruce reciente a la baja
+        prev["RSI"] > 70 and latest["RSI"] < 70 and  # RSI saliendo de sobrecompra
+        latest["close"] < latest["open"] and  # vela roja
+        latest["MACDh"] < prev["MACDh"]  # impulso bajista creciente
+    ):
+        signal = "SELL"
+
+    return signal
 
 def get_price_and_change(symbol, api_key):
-    api_symbol = symbol 
-    
     url = "https://api.twelvedata.com/quote"
-    params = {
-        "symbol": api_symbol,
-        "apikey": api_key
-    }
+    params = {"symbol": symbol, "apikey": api_key}
     try:
         response = requests.get(url, params=params)
         data = response.json()
-        
-        print(f"API Response for {api_symbol}: {data}")
-        
         if data.get("status") == "error":
-            print(f"API error for {api_symbol}: {data.get('message')}")
             return None
-        
-        # 'close' es el precio; 'percent_change' es el cambio porcentual
-        price = float(data.get("close", 0))
-        change = float(data.get("percent_change", 0))
-        
         return {
-            "symbol": api_symbol,
-            "price": price,
-            "change": change,
-            "display_symbol": api_symbol  # ya viene con "EUR/USD"
+            "symbol": symbol,
+            "price": float(data.get("close", 0)),
+            "change": float(data.get("percent_change", 0))
         }
-    except Exception as e:
-        print(f"Error obteniendo datos para {api_symbol}: {e}")
+    except Exception:
         return None
 
-
+def safe_format(value, fmt=".4f"):
+    try:
+        return format(float(value), fmt)
+    except:
+        return "N/A"
 
 @app.route("/", methods=["GET", "POST"])
 def index():
     result = None
     error = None
 
-    # En tu ruta Flask (/)
-    MAJOR_CURRENCY_PAIRS = [
-    "EUR/USD",
-    "USD/JPY",
-    "GBP/JPY",
-    ]
-
-
+    PAIRS = ["EUR/USD", "USD/JPY", "GBP/JPY"]
     ticker_data = []
-    for symbol in MAJOR_CURRENCY_PAIRS:
-        data = get_price_and_change(symbol, API_KEY)
-        if data:
+    for pair in PAIRS:
+        data = get_price_and_change(pair, API_KEY)
+        if data is not None:
             ticker_data.append(data)
-        else:
-            print(f"No data for {symbol}")
-
 
     if request.method == "POST":
         symbol = request.form.get("symbol", "EUR/USD").upper()
@@ -114,17 +113,17 @@ def index():
             df = calculate_indicators(df)
             signal = generate_signal(df)
             last_close = df["close"].iloc[-1]
+            latest = df.iloc[-1]
             result = {
                 "symbol": symbol.replace("/", ""),
                 "interval": interval,
-                "last_close": last_close,
-                "signal": signal
+                "last_close": safe_format(last_close),
+                "signal": signal,
+                "rsi": safe_format(latest["RSI"], ".2f"),
+                "macd": safe_format(latest["MACD"], ".4f"),
+                "macdh": safe_format(latest["MACDh"], ".4f")
             }
-        else:
-            # Aquí el error ya tiene el mensaje recibido de la API
-            print("API error:", error)  # También ver en consola
     return render_template("index.html", result=result, error=error, ticker_data=ticker_data)
-
 
 if __name__ == "__main__":
     app.run(debug=True)
